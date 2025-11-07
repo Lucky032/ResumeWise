@@ -8,6 +8,7 @@ import {
   Sparkles,
   Eye,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -58,9 +59,11 @@ export default function ResumeEditPage({ params }: { params: { id: string } }) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-4 mb-4">
-        <Button variant="outline" size="icon" className="h-7 w-7">
-          <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
+        <Button asChild variant="outline" size="icon" className="h-7 w-7">
+          <Link href="/dashboard">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Link>
         </Button>
         <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold font-headline tracking-tight sm:grow-0">
           {resumeData.title}
@@ -103,3 +106,5 @@ export default function ResumeEditPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
+    
