@@ -16,11 +16,14 @@ const AnalyzeResumeForATSInputSchema = z.object({
     .string()
     .describe(
       "A PDF of a resume, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."
-    ),
+    ).optional(),
+  resumeText: z.string().optional().describe("The text content of a resume."),
   jobDescription: z
     .string()
     .optional()
     .describe('The job description to compare the resume against.'),
+}).refine(data => data.resumePdf || data.resumeText, {
+  message: 'Either resumePdf or resumeText must be provided.',
 });
 export type AnalyzeResumeForATSInput = z.infer<typeof AnalyzeResumeForATSInputSchema>;
 
@@ -52,8 +55,15 @@ const atsPrompt = ai.definePrompt({
   prompt: `You are an expert in Applicant Tracking Systems (ATS) and resume optimization.
 Analyze the following resume and provide a detailed ATS compatibility analysis.
 
-Resume:
+{{#if resumePdf}}
+Resume (PDF):
 {{media url=resumePdf}}
+{{/if}}
+
+{{#if resumeText}}
+Resume (Text):
+{{{resumeText}}}
+{{/if}}
 
 Job Description (optional, if provided, compare the resume to the job description):
 {{{jobDescription}}}
