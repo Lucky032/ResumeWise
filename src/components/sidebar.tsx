@@ -4,9 +4,7 @@ import Link from 'next/link';
 import {
   FileText,
   Home,
-  Package,
   Settings,
-  PlusCircle,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -22,6 +20,7 @@ import {
 import { useUser, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from './ui/sidebar';
 
 
 export function AppSidebar() {
@@ -41,19 +40,20 @@ export function AppSidebar() {
   const isProUser = userData?.subscription === 'pro';
 
   return (
-    <div className="hidden border-r bg-background md:block">
-      <div className="flex h-full max-h-screen flex-col gap-2">
+    <Sidebar>
+      <SidebarHeader>
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link href="/" className="flex items-center gap-2 font-semibold font-headline">
             <Logo className="h-6 w-6 text-primary" />
             <span className="">ResumeWise</span>
           </Link>
         </div>
-        <div className="flex-1">
-          <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            {navItems.map((item) => (
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          {navItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
               <Link
-                key={item.href}
                 href={item.href}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
@@ -65,9 +65,10 @@ export function AppSidebar() {
                 <item.icon className="h-4 w-4" />
                 {item.label}
               </Link>
-            ))}
-          </nav>
-        </div>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
         {!isProUser && (
            <div className="mt-auto p-4">
             <Card>
@@ -86,7 +87,6 @@ export function AppSidebar() {
             </Card>
           </div>
         )}
-      </div>
-    </div>
+    </Sidebar>
   );
 }
