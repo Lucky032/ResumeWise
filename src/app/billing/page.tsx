@@ -99,7 +99,7 @@ export default function BillingPage() {
 
       router.push('/dashboard');
 
-    } catch (err: any)      {
+    } catch (err: any) {
       console.error('Upgrade failed', err);
       toast({
         variant: 'destructive',
