@@ -202,7 +202,7 @@ export default function BillingPage() {
                 <p className="font-semibold">To get your <span className="text-primary">{planDetails.name}</span>, please pay ₹{planDetails.price} via UPI:</p>
                 <div className="my-2 select-all rounded-md bg-muted p-2 font-mono text-sm">{UPI_ID}</div>
                 <Image
-                    src="https://picsum.photos/seed/qr-code/200/200"
+                    src="https://placehold.co/200x200/png?text=PayTM%20QR%20Code"
                     data-ai-hint="qr code"
                     alt="UPI QR Code"
                     className="mx-auto mt-2 rounded-md"
