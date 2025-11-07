@@ -20,7 +20,7 @@ import {
 import { useUser, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from './ui/sidebar';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem } from './ui/sidebar';
 
 
 export function AppSidebar() {
@@ -37,7 +37,7 @@ export function AppSidebar() {
     { href: '/settings', icon: Settings, label: 'Settings' },
   ];
 
-  const isProUser = userData?.subscription === 'pro';
+  const hasPaidPlan = userData?.plan && userData.plan !== 'free';
 
   return (
     <Sidebar>
@@ -69,19 +69,18 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-        {!isProUser && (
+        {!hasPaidPlan && (
            <div className="mt-auto p-4">
             <Card>
               <CardHeader className="p-2 pt-0 md:p-4">
-                <CardTitle>Upgrade to Pro</CardTitle>
+                <CardTitle>Get a Tailored Resume</CardTitle>
                 <CardDescription>
-                  Unlock all features and get unlimited access to our support
-                  team.
+                  Unlock AI features and create a professional resume.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
                 <Button size="sm" className="w-full bg-accent hover:bg-accent/90" asChild>
-                  <Link href="/billing">Upgrade</Link>
+                  <Link href="/billing">Upgrade Now</Link>
                 </Button>
               </CardContent>
             </Card>

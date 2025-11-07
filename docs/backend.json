@@ -24,9 +24,9 @@
           "description": "URL of the user's profile photo (optional).",
           "format": "uri"
         },
-        "subscription": {
+        "plan": {
           "type": "string",
-          "description": "User's subscription type: free or pro.",
+          "description": "User's plan type: free, fresher, or experienced.",
           "format": "string"
         },
         "createdAt": {
@@ -349,4 +349,3 @@
     "reasoning": "The Firestore data structure is designed to support a resume builder application with AI-powered features, user authentication, and template management, while adhering to the principles of Authorization Independence, Structural Segregation, Access Modeling, and Data Clarity. The structure focuses on path-based ownership for user-specific data and denormalization to avoid hierarchical authorization dependencies.\n\n*   **Authorization Independence:** The design avoids `get()` calls in security rules by denormalizing authorization data. For example, the `Resume` collection includes the `userId` field, which allows direct authorization based on the requesting user's ID without needing to fetch the user document. This is crucial for atomic operations.\n\n*   **Structural Segregation:** Different data types with different access requirements are stored in separate collections. User profiles are stored in `/users/{userId}`, resumes are stored in `/resumes/{resumeId}`, templates are stored in `/templates/{templateId}`, shared resumes are stored in `/sharedResumes/{shareToken}`, and AI usage data are stored in `/aiUsage/{userId}_{date}`. This simplifies security rules by ensuring that all documents in a collection share the same security requirements.\n\n*   **Access Modeling:** Path-based ownership is used for user-owned data such as resumes (`/users/{userId}/resumes/{resumeId}`). Collaborative data is handled through shared resume links (`/sharedResumes/{shareToken}`), which may require additional security measures like passwords.\n\n*   **QAPs (Rules are not Filters):** The structure supports secure `list` operations. For example, listing resumes under `/resumes` is secured by checking if `request.auth.uid == resource.data.userId`, ensuring that only the owner can access their resumes. The segregation of user-owned data into `/users/{userId}/resumes/{resumeId}` further enables secure and efficient list operations.\n\n*   **Global Roles (DBAC):** While not explicitly used in this design, global roles could be implemented using dedicated collections such as `/roles_admin/{uid}` or `/roles_premium/{uid}` to manage administrative or premium access.\n\n*   **Data Clarity and Predictability:** The schema enforces consistent naming conventions (e.g., `userId`, `createdAt`, `updatedAt`) and avoids dynamic keys. Explicit state modeling (e.g., using a `status` field if needed) would further enhance predictability.\n"
   }
 }
-    
