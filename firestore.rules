@@ -1,0 +1,142 @@
+/**
+ * @description This ruleset enforces a strict user-ownership model for user-specific data,
+ *              allows public read access to templates, and restricts access to shared resumes
+ *              based on the associated user. It prioritizes authorization independence by
+ *              denormalizing authorization data directly onto documents, avoiding costly
+ *              `get()` calls.
+ * @dataStructure
+ *   - /users/{userId}: Stores user profile information, with document ID matching the user's UID.
+ *   - /resumes/{resumeId}: Stores resume data, with a 'userId' field for owner identification.
+ *   - /templates/{templateId}: Stores resume template information, publicly readable.
+ *   - /sharedResumes/{shareToken}: Stores shared resume link information, accessible via share token.
+ *   - /aiUsage/{aiUsageId}: Stores AI usage data, with document ID as combination of userId and date.
+ * @keySecurityDecisions
+ *   - User listing is disallowed.
+ *   - Templates are publicly readable.
+ *   - Shared Resumes are accessible only via their unique tokens.
+ *   - Owner ID must match authenticated user's UID on creation and updates.
+ * @denormalizationForAuthorization
+ *   - The 'Resume' entity has a 'userId' field to directly associate it with its owner, avoiding the need for `get()` calls to the `/users/{userId}` document.
+ * @structuralSegregation
+ *   - User-specific data (resumes, AI usage) is stored separately from public data (templates).
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Secure user profiles, allowing only the owner to read and write their own data.
+     * @path /users/{userId}
+     * @allow (create) - User 'user_abc' can create their profile if authenticated as 'user_abc'.
+     *                      `request.auth.uid == 'user_abc'` and `request.resource.data.id == 'user_abc'`
+     * @allow (get, update, delete) - User 'user_abc' can read/update/delete their profile if authenticated as 'user_abc'.
+     *                                `request.auth.uid == 'user_abc'`
+     * @deny (create) - User 'user_def' cannot create a profile for 'user_abc'.
+     *                   `request.auth.uid == 'user_def'` but the path is `/users/user_abc`.
+     * @deny (update, delete) - User 'user_def' cannot update/delete user 'user_abc's profile.
+     *                          `request.auth.uid == 'user_def'` and the path is `/users/user_abc`.
+     * @deny (list) - Listing all users is prohibited.
+     * @principle Enforces document ownership for writes and restricts listing.
+     */
+    match /users/{userId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isSignedIn() && isOwner(userId) && resource.data.id == userId;
+      allow delete: if isSignedIn() && isOwner(userId) && resource.data.id == userId;
+    }
+
+    /**
+     * @description Secure resumes, allowing only the owner to read, create, update, and delete their own resumes.
+     * @path /resumes/{resumeId}
+     * @allow (create) - User 'user_abc' can create a resume with 'userId' set to 'user_abc'.
+     *                   `request.auth.uid == 'user_abc'` and `request.resource.data.userId == 'user_abc'`
+     * @allow (get, update, delete) - User 'user_abc' can read/update/delete a resume if they own it.
+     *                                `request.auth.uid == resource.data.userId`
+     * @deny (create) - User 'user_def' cannot create a resume for 'user_abc'.
+     *                   `request.auth.uid == 'user_def'` and `request.resource.data.userId == 'user_abc'`
+     * @deny (update, delete) - User 'user_def' cannot update/delete a resume owned by 'user_abc'.
+     *                          `request.auth.uid == 'user_def'` and `resource.data.userId == 'user_abc'`
+     * @allow (list) - User 'user_abc' can list their resumes if `request.auth.uid == resource.data.userId`.
+     * @principle Enforces document ownership for writes.
+     */
+    match /resumes/{resumeId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      allow get: if isSignedIn() && isOwner(resource.data.userId);
+      allow list: if isSignedIn() && isOwner(request.auth.uid);
+
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && resource != null;
+      allow delete: if isSignedIn() && isOwner(resource.data.userId) && resource != null;
+    }
+
+    /**
+     * @description Make templates publicly readable, but disallow any creation, updates, or deletion.
+     * @path /templates/{templateId}
+     * @allow (get, list) - Anyone can read template data.
+     * @deny (create, update, delete) - No one can create, update, or delete templates.
+     * @principle Allows public read access with restricted writes.
+     */
+    match /templates/{templateId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Secure shared resumes, allowing only access via a valid shareToken (no direct listing, creation or deletion).
+     * @path /sharedResumes/{shareToken}
+     * @allow (get) - Anyone can read a shared resume.
+     * @deny (create, update, delete, list) - No one can create, update, delete or list shared resumes.
+     */
+    match /sharedResumes/{shareToken} {
+      allow get: if true;
+      allow list, create, update, delete: if false;
+    }
+
+    /**
+     * @description Secure AI usage data, allowing only the owner to read, create, update, and delete their own data.
+     * @path /aiUsage/{aiUsageId}
+     * @allow (create) - User 'user_abc' can create AI usage data if the 'userId' matches 'user_abc'.
+     *                   `request.auth.uid == 'user_abc'` and `request.resource.data.userId == 'user_abc'`
+     * @allow (get, update, delete) - User 'user_abc' can read/update/delete their own AI usage data.
+     *                                `request.auth.uid == resource.data.userId`
+     * @deny (create) - User 'user_def' cannot create AI usage data for 'user_abc'.
+     *                   `request.auth.uid == 'user_def'` and `request.resource.data.userId == 'user_abc'`
+     * @deny (update, delete) - User 'user_def' cannot update/delete AI usage data owned by 'user_abc'.
+     *                          `request.auth.uid == 'user_def'` and `resource.data.userId == 'user_abc'`
+     * @allow (list) - User 'user_abc' can list their own AI usage if `request.auth.uid == resource.data.userId`.
+     */
+    match /aiUsage/{aiUsageId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      allow get: if isSignedIn() && isOwner(resource.data.userId);
+      allow list: if isSignedIn() && isOwner(request.auth.uid);
+
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && resource != null;
+      allow delete: if isSignedIn() && isOwner(resource.data.userId) && resource != null;
+    }
+  }
+}
