@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "template_modern_clean",
+      "description": "Preview of the Modern Clean resume template",
+      "imageUrl": "https://images.unsplash.com/photo-1760405253210-d495d59c32dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN1bWUlMjB0ZW1wbGF0ZXxlbnwwfHx8fDE3NjI0OTA2NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "resume template"
+    },
+    {
+      "id": "template_professional",
+      "description": "Preview of the Professional resume template",
+      "imageUrl": "https://images.unsplash.com/photo-1723095136747-20a24afcee20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyZXN1bWUlMjBkb2N1bWVudHxlbnwwfHx8fDE3NjI0MDU0MzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "resume document"
+    },
+    {
+      "id": "template_creative",
+      "description": "Preview of the Creative resume template",
+      "imageUrl": "https://images.unsplash.com/photo-1631127900584-188260979218?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb2xvcmZ1bCUyMHJlc3VtZXxlbnwwfHx8fDE3NjI0OTA2NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "colorful resume"
+    },
+    {
+      "id": "template_minimal",
+      "description": "Preview of the Minimal resume template",
+      "imageUrl": "https://images.unsplash.com/photo-1580837428500-74aa7eefc672?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtaW5pbWFsaXN0JTIwZGVzaWdufGVufDB8fHx8MTc2MjQ3MDc5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "minimalist design"
+    },
+    {
+      "id": "template_executive",
+      "description": "Preview of the Executive resume template",
+      "imageUrl": "https://images.unsplash.com/photo-1700887937204-69f8b8400ace?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBsYXlvdXR8ZW58MHx8fHwxNzYyNDkwNjcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional layout"
+    }
+  ]
 }
