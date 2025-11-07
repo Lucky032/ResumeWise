@@ -19,15 +19,26 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card';
+import { useUser, useFirestore } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
+
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const userDocRef = user ? doc(firestore, 'users', user.uid) : null;
+  const [userData] = useDocumentData(userDocRef);
 
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'Dashboard' },
     { href: '/resumes', icon: FileText, label: 'My Resumes' },
     { href: '/settings', icon: Settings, label: 'Settings' },
   ];
+
+  const isProUser = userData?.subscription === 'pro';
 
   return (
     <div className="hidden border-r bg-background md:block">
@@ -47,7 +58,7 @@ export function AppSidebar() {
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
                   {
-                    'bg-muted text-primary': pathname === item.href,
+                    'bg-muted text-primary': pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard'),
                   }
                 )}
               >
@@ -57,22 +68,24 @@ export function AppSidebar() {
             ))}
           </nav>
         </div>
-        <div className="mt-auto p-4">
-          <Card>
-            <CardHeader className="p-2 pt-0 md:p-4">
-              <CardTitle>Upgrade to Pro</CardTitle>
-              <CardDescription>
-                Unlock all features and get unlimited access to our support
-                team.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-              <Button size="sm" className="w-full bg-accent hover:bg-accent/90">
-                Upgrade
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        {!isProUser && (
+           <div className="mt-auto p-4">
+            <Card>
+              <CardHeader className="p-2 pt-0 md:p-4">
+                <CardTitle>Upgrade to Pro</CardTitle>
+                <CardDescription>
+                  Unlock all features and get unlimited access to our support
+                  team.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
+                <Button size="sm" className="w-full bg-accent hover:bg-accent/90" asChild>
+                  <Link href="/billing">Upgrade</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

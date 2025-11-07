@@ -2,7 +2,6 @@
 
 import { AppHeader } from '@/components/header';
 import { AppSidebar } from '@/components/sidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -32,7 +31,6 @@ export default function DashboardLayout({
   }
 
   return (
-    <SidebarProvider>
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <AppSidebar />
         <div className="flex flex-col">
@@ -42,8 +40,5 @@ export default function DashboardLayout({
           </main>
         </div>
       </div>
-    </SidebarProvider>
   );
 }
-
-    
