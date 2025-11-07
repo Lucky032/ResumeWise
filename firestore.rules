@@ -51,8 +51,8 @@ service cloud.firestore {
       allow list: if false;
 
       allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isSignedIn() && isOwner(userId) && resource.data.id == userId;
-      allow delete: if isSignedIn() && isOwner(userId) && resource.data.id == userId;
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId);
     }
 
     /**
@@ -140,3 +140,4 @@ service cloud.firestore {
     }
   }
 }
+    
