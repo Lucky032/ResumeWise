@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -25,7 +26,7 @@ import Image from 'next/image';
 const plans = {
   fresher: {
     name: 'Fresher Resume',
-    price: 50,
+    price: 1,
     features: [
       'Perfect for students and recent graduates',
       'ATS-Optimized Template',
