@@ -23,8 +23,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-const UPI_ID = '9502657244@ptsbi'; 
-
 const plans = {
   fresher: {
     name: 'Fresher Resume',
@@ -196,22 +194,6 @@ export default function BillingPage() {
               )
             })}
           </RadioGroup>
-
-          {planDetails && (
-              <div className="text-center border-t pt-6 space-y-4">
-                <p className="font-semibold">To get your <span className="text-primary">{planDetails.name}</span>, please pay ₹{planDetails.price} via UPI:</p>
-                <div className="my-2 select-all rounded-md bg-muted p-2 font-mono text-sm">{UPI_ID}</div>
-                <Image
-                    src="https://placehold.co/200x200/png?text=PayTM%20QR%20Code"
-                    data-ai-hint="qr code"
-                    alt="UPI QR Code"
-                    className="mx-auto mt-2 rounded-md"
-                    width={150}
-                    height={150}
-                />
-              </div>
-          )}
-
         </CardContent>
           <CardFooter className="flex flex-col gap-2 border-t pt-6">
             <Button onClick={handleUpgrade} disabled={isUpgrading || !selectedPlan} className="w-full bg-accent hover:bg-accent/90">
@@ -220,7 +202,7 @@ export default function BillingPage() {
               ) : (
                 <CheckCircle className="mr-2 h-4 w-4" />
               )}
-              I have paid. Activate my plan!
+              Activate Plan
             </Button>
             <Button asChild variant="outline" className="w-full">
                 <Link href="/dashboard">Maybe Later</Link>
