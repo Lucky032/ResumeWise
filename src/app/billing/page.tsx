@@ -11,12 +11,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useUser, useFirestore } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Loader2, CheckCircle, Star, IndianRupee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -47,6 +46,8 @@ const plans = {
 };
 
 type PlanKey = keyof typeof plans;
+const UPI_ID = '9502657244@ptsbi';
+const PAYEE_NAME = 'ResumeWise';
 
 export default function BillingPage() {
   const { user, isUserLoading } = useUser();
@@ -66,6 +67,12 @@ export default function BillingPage() {
     if (!selectedPlan) return null;
     return plans[selectedPlan];
   }, [selectedPlan]);
+  
+  const qrCodeUrl = useMemo(() => {
+    if (!planDetails) return '';
+    const upiLink = `upi://pay?pa=${UPI_ID}&pn=${PAYEE_NAME}&am=${planDetails.price}&cu=INR`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
+  }, [planDetails]);
 
   const handleUpgrade = async () => {
     if (!user || !userDocRef || !selectedPlan) {
@@ -79,9 +86,9 @@ export default function BillingPage() {
 
     setIsUpgrading(true);
     try {
-      // This is a mock payment confirmation.
-      // In a real app, you would verify the payment with a backend service.
-      updateDocumentNonBlocking(userDocRef, { plan: selectedPlan });
+      // In a real app, you would verify payment via a backend webhook.
+      // Here, we just assume payment is successful.
+      await updateDoc(userDocRef, { plan: selectedPlan });
 
       toast({
         title: 'Upgrade Successful!',
@@ -89,7 +96,6 @@ export default function BillingPage() {
         className: 'bg-green-500 text-white',
       });
 
-      // Redirect or update UI
       router.push('/dashboard');
 
     } catch (err: any)      {
@@ -194,6 +200,34 @@ export default function BillingPage() {
               )
             })}
           </RadioGroup>
+            
+          {selectedPlan && planDetails && (
+            <div className='pt-6 border-t'>
+                <CardTitle className="text-center font-headline text-xl mb-4">Complete Your Payment</CardTitle>
+                <div className='flex flex-col md:flex-row items-center justify-center gap-6'>
+                    <div className='w-[200px] h-[200px] bg-white p-2 border rounded-md'>
+                      <Image
+                        src={qrCodeUrl}
+                        alt="UPI QR Code"
+                        width={200}
+                        height={200}
+                        className='object-contain'
+                      />
+                    </div>
+                    <div className='text-center md:text-left'>
+                        <p className='text-muted-foreground'>Scan the QR code with your UPI app or pay to:</p>
+                        <p className='font-mono text-primary font-bold my-2'>{UPI_ID}</p>
+                        <div className="flex items-baseline justify-center md:justify-start">
+                            <span className='font-semibold'>Amount:</span>
+                            <IndianRupee className="h-5 w-5 ml-2"/>
+                            <span className="text-2xl font-bold">{planDetails.price}</span>
+                        </div>
+                         <p className='text-xs text-muted-foreground mt-4'>After payment, click "Activate Plan" below.</p>
+                    </div>
+                </div>
+            </div>
+          )}
+
         </CardContent>
           <CardFooter className="flex flex-col gap-2 border-t pt-6">
             <Button onClick={handleUpgrade} disabled={isUpgrading || !selectedPlan} className="w-full bg-accent hover:bg-accent/90">
