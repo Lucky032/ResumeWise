@@ -21,6 +21,7 @@ import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 const UPI_ID = '9502657244@ptsbi'; 
 
@@ -200,7 +201,7 @@ export default function BillingPage() {
               <div className="text-center border-t pt-6 space-y-4">
                 <p className="font-semibold">To get your <span className="text-primary">{planDetails.name}</span>, please pay ₹{planDetails.price} via UPI:</p>
                 <div className="my-2 select-all rounded-md bg-muted p-2 font-mono text-sm">{UPI_ID}</div>
-                <img
+                <Image
                     src="https://picsum.photos/seed/qr-code/200/200"
                     data-ai-hint="qr code"
                     alt="UPI QR Code"
