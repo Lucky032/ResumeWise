@@ -6,45 +6,74 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ShieldCheck, Github, FileText, Bot } from 'lucide-react';
+import { Loader2, ShieldCheck, Github, FileText, Bot, Upload, File, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons';
 import { Progress } from '@/components/ui/progress';
 
 export default function LandingPage() {
-  const [resumeText, setResumeText] = useState('');
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [analysisResult, setAnalysisResult] = useState<AnalyzeResumeForATSOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      setResumeFile(file);
+    } else {
+      setResumeFile(null);
+      toast({
+        variant: 'destructive',
+        title: 'Invalid File Type',
+        description: 'Please upload a PDF file.',
+      });
+    }
+  };
+
   const handleAnalyze = async () => {
-    if (!resumeText.trim()) {
+    if (!resumeFile) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Please paste your resume text before analyzing.',
+        description: 'Please upload your resume PDF before analyzing.',
       });
       return;
     }
     setIsLoading(true);
     setAnalysisResult(null);
-    try {
-      const result = await analyzeResumeForATS({
-        resumeText,
-        jobDescription,
-      });
-      setAnalysisResult(result);
-    } catch (error) {
-      console.error('Error analyzing for ATS:', error);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(resumeFile);
+    reader.onload = async () => {
+      const resumePdf = reader.result as string;
+      try {
+        const result = await analyzeResumeForATS({
+          resumePdf,
+          jobDescription,
+        });
+        setAnalysisResult(result);
+      } catch (error) {
+        console.error('Error analyzing for ATS:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to run ATS analysis. Please try again.',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    reader.onerror = () => {
+      console.error('Error reading file');
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to run ATS analysis. Please try again.',
+        description: 'Failed to read the resume file. Please try again.',
       });
-    } finally {
       setIsLoading(false);
-    }
+    };
   };
 
   return (
@@ -107,7 +136,7 @@ export default function LandingPage() {
                 <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">ATS Checker</div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Optimize Your Resume for Robots</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Paste your resume and an optional job description to see how well you match up. Our AI will give you a score and actionable feedback.
+                  Upload your resume PDF and an optional job description to see how well you match up. Our AI will give you a score and actionable feedback.
                 </p>
               </div>
             </div>
@@ -117,15 +146,27 @@ export default function LandingPage() {
                   <div className="grid gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label htmlFor="resume-text" className="font-medium">Your Resume</label>
-                        <Textarea
-                          id="resume-text"
-                          placeholder="Paste the full text of your resume here."
-                          value={resumeText}
-                          onChange={(e) => setResumeText(e.target.value)}
-                          rows={12}
-                          className="resize-y"
-                        />
+                        <label htmlFor="resume-upload" className="font-medium">Your Resume (PDF)</label>
+                        <div className="flex items-center justify-center w-full">
+                            <label htmlFor="resume-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    {resumeFile ? (
+                                        <>
+                                            <File className="w-10 h-10 mb-3 text-primary" />
+                                            <p className="mb-2 text-sm font-semibold">{resumeFile.name}</p>
+                                            <p className="text-xs text-muted-foreground">{(resumeFile.size / 1024).toFixed(2)} KB</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
+                                        </>
+                                    )}
+                                </div>
+                                <input id="resume-upload" type="file" className="hidden" accept="application/pdf" onChange={handleFileChange} />
+                            </label>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label htmlFor="job-description" className="font-medium">Job Description (Optional)</label>
@@ -135,7 +176,7 @@ export default function LandingPage() {
                           value={jobDescription}
                           onChange={(e) => setJobDescription(e.target.value)}
                           rows={12}
-                          className="resize-y"
+                          className="resize-y h-48"
                         />
                       </div>
                     </div>
@@ -154,21 +195,44 @@ export default function LandingPage() {
                     </Button>
 
                     {analysisResult && (
-                      <div className="space-y-4 pt-4 border-t">
+                      <div className="space-y-6 pt-6 border-t">
                          <div className="flex flex-col items-center space-y-2">
-                            <h3 className="text-2xl font-bold font-headline">Your ATS Score</h3>
+                            <h3 className="text-2xl font-bold font-headline">Your Overall ATS Score</h3>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-6xl font-bold text-primary">{analysisResult.atsCompatibilityScore}</span>
+                                <span className="text-6xl font-bold text-primary">{analysisResult.overallScore}</span>
                                 <span className="text-2xl text-muted-foreground">/ 100</span>
                             </div>
-                            <Progress value={analysisResult.atsCompatibilityScore} className="w-full max-w-sm h-3" />
+                            <Progress value={analysisResult.overallScore} className="w-full max-w-sm h-3" />
                          </div>
 
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-lg text-center">Suggestions for Improvement</h4>
-                          <ul className="list-disc list-inside space-y-2 text-sm bg-muted p-4 rounded-md">
-                            {analysisResult.suggestions.map((suggestion, index) => (
-                              <li key={index}>{suggestion}</li>
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-xl text-center font-headline">Section-by-Section Analysis</h4>
+                          <div className='grid md:grid-cols-2 gap-4'>
+                            {analysisResult.sections.map((section, index) => (
+                              <Card key={index}>
+                                <CardHeader className='pb-2'>
+                                  <CardTitle className="text-lg flex justify-between items-center">
+                                    <span>{section.section}</span>
+                                    <span className='text-primary'>{section.score}/100</span>
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Progress value={section.score} className="h-2 mb-2"/>
+                                    <p className="text-sm text-muted-foreground">{section.feedback}</p>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+
+                         <div className="space-y-2">
+                          <h4 className="font-semibold text-xl text-center font-headline">General Recommendations</h4>
+                          <ul className="list-none space-y-2 text-sm bg-muted/50 p-4 rounded-md">
+                            {analysisResult.generalRecommendations.map((rec, index) => (
+                              <li key={index} className="flex items-start gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0"/>
+                                <span>{rec}</span>
+                              </li>
                             ))}
                           </ul>
                         </div>
@@ -211,5 +275,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-    
