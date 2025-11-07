@@ -22,8 +22,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 
-// TODO: Replace with your actual UPI ID
-const UPI_ID = 'your-upi-id@okhdfcbank'; 
+const UPI_ID = '9502657244@ptsbi'; 
 
 const plans = {
   fresher: {
