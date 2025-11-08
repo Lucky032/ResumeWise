@@ -4,8 +4,7 @@ import React, { DependencyList, createContext, useContext, ReactNode, useMemo, u
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
-import type { UserHookResult } from '@/firebase/auth/use-user';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 interface FirebaseProviderProps {
   children: ReactNode;
@@ -38,6 +37,12 @@ export interface FirebaseServicesAndUser {
   firebaseApp: FirebaseApp;
   firestore: Firestore;
   auth: Auth;
+  user: User | null;
+  isUserLoading: boolean;
+  userError: Error | null;
+}
+
+export interface UserHookResult {
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
@@ -129,17 +134,6 @@ export const useFirebase = (): FirebaseServicesAndUser => {
     userError: context.userError,
   };
 };
-
-/**
- * Hook specifically for accessing the authenticated user's state.
- * This provides the User object, loading status, and any auth errors.
- * @returns {UserHookResult} Object with user, isUserLoading, userError.
- */
-export const useUser = (): UserHookResult => {
-  const { user, isUserLoading, userError } = useFirebase(); // Leverages the main hook
-  return { user, isUserLoading, userError };
-};
-
 
 /** Hook to access Firebase Auth instance. */
 export const useAuth = (): Auth => {
