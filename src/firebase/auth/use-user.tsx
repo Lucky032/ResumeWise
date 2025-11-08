@@ -1,7 +1,7 @@
 'use client';
 
-import type { User } from 'firebase/auth';
 import { useFirebase } from '@/firebase/provider';
+import type { User } from 'firebase/auth';
 
 export interface UserHookResult {
   user: User | null;
