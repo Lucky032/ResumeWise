@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeWise - Setup Required</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { margin-top: 0; }
+        .step {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 ResumeWise - Deployment Setup Required</h1>
+        <p>Your Vercel deployment is configured, but your GitHub repository needs the actual application code.</p>
+        
+        <h2>📋 What's Missing:</h2>
+        <div class="step">
+            <strong>1. package.json</strong> - Node.js dependencies and build scripts
+        </div>
+        <div class="step">
+            <strong>2. src/ folder</strong> - Your React component files
+        </div>
+        <div class="step">
+            <strong>3. public/ folder</strong> - Static assets and index.html template
+        </div>
+        
+        <h2>✅ To Fix:</h2>
+        <p>From your local development machine, run:</p>
+        <div class="step">
+            <code>git add .</code><br>
+            <code>git commit -m "Add complete application code"</code><br>
+            <code>git push origin main</code>
+        </div>
+        
+        <p><strong>Vercel will automatically deploy once you push your code!</strong></p>
+    </div>
+</body>
+</html>
